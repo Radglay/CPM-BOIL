@@ -1,5 +1,6 @@
 import React, { useState, Component } from 'react';
 import Table from "./Table";
+import Results from "./Results";
 
 export default class Form extends React.Component {
     
@@ -59,6 +60,8 @@ export default class Form extends React.Component {
                     </tr>
                 ))}
                 </table>
+
+                <Results />
             </div>
         );
     }
