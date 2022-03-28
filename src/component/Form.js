@@ -11,7 +11,8 @@ export default class Form extends React.Component {
         this.state = {
             name: '',
             time: '',
-            sequenceOfEvents: []
+            sequenceOfEvents: [],
+            elements: []
         };
 
         this.setName = this.setName.bind(this);
@@ -61,7 +62,7 @@ export default class Form extends React.Component {
                 ))}
                 </table>
 
-                <Results />
+                <Results parentData = {this.state}/>
             </div>
         );
     }
@@ -95,7 +96,12 @@ export default class Form extends React.Component {
         event.preventDefault();
 
 
+
         alert('Pomyslnie dodano');
-        console.log(this.elements);
+    }
+
+
+    sendData() {
+        return 
     }
 }

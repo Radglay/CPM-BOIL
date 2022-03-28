@@ -2,11 +2,15 @@ import React, { Component } from "react"
 import Chart from "react-google-charts";
 
 
-function daysToMilliseconds(days) {
+
+export default class Results extends React.Component {
+
+    
+daysToMilliseconds = (days) => {
     return days * 24 * 60 * 60 * 1000;
   }
 
-const columns = [
+columns = [
     { type: "string", label: "Task ID" },
     { type: "string", label: "Task Name" },
     { type: "date", label: "Start Date" },
@@ -17,10 +21,11 @@ const columns = [
   ];
 
 
-const rows = [
+rows = [
 [
     "Research",
-    "Find sources",
+    // this.parentData.props.name,
+    "A",
     new Date(2015, 0, 1),
     new Date(2015, 0, 5),
     null,
@@ -29,55 +34,53 @@ const rows = [
 ],
 [
     "Write",
-    "Write paper",
+    "B",
     null,
     new Date(2015, 0, 9),
-    daysToMilliseconds(3),
-    25,
-    "Research,Outline"
+    this.daysToMilliseconds(3),
+    100,
+    "Outline"
 ],
 [
     "Cite",
-    "Create bibliography",
+    "C",
     null,
     new Date(2015, 0, 7),
-    daysToMilliseconds(1),
-    20,
+    this.daysToMilliseconds(1),
+    100,
     "Research"
 ],
 [
     "Complete",
-    "Hand in paper",
+    "D",
     null,
     new Date(2015, 0, 10),
-    daysToMilliseconds(1),
-    0,
+    this.daysToMilliseconds(1),
+    100,
     "Cite,Write"
 ],
 [
     "Outline",
-    "Outline paper",
+    "E",
     null,
     new Date(2015, 0, 6),
-    daysToMilliseconds(1),
+    this.daysToMilliseconds(1),
     100,
     "Research"
 ]
 ];
 
-export default class Results extends React.Component {
-
-    
-
     render() {
         return (
             <Chart 
                 chartType="Gantt"
-                data={[columns, ...rows]}
+                data={[this.columns, ...this.rows]}
                 width="100%"
                 height="50%"
                 legnedToggle
+
             />
+            
             );
     }
 }
