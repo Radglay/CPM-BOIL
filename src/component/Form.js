@@ -1,107 +1,70 @@
-import React, { useState, Component } from 'react';
+import React, { useState } from 'react';
 import Table from "./Table";
 import Results from "./Results";
+import '../App.css';
 
-export default class Form extends React.Component {
+export default function Form() {
     
-    elements = [];
-
-    constructor(props) {
-        super(props);
-        this.state = {
-            name: '',
-            time: '',
-            sequenceOfEvents: [],
-            elements: []
-        };
-
-        this.setName = this.setName.bind(this);
-        this.setTime = this.setTime.bind(this);
-        this.setSequenceOfEvents = this.setSequenceOfEvents.bind(this);
-        this.handleSubmit = this.handleSubmit.bind(this);
-    }
-
-    render() {
-        return (
-            <div>
-                <form onSubmit={this.handleSubmit}>
-                    <label for="name">Nazwa czynności: </label>
-                    <input name="name" onChange={(event) => this.setName(event)}/>
-
-                    &nbsp;&nbsp;
-
-                    <label for="time">Czas trwania czynności:</label>
-                    <input name="time" onChange={(event) => this.setTime(event)}/>
-                    
-                    &nbsp;&nbsp;
-
-                    <label for="sequenceOfEvents">Czynności poprzedzające:</label>
-                    <input name="sequenceOfEvents" onChange={(event) => this.setSequenceOfEvents(event)}/>
-
-                    <input type="submit" value="Dodaj"/>
-                </form>
-
-                <br/>
-                <br/>
-
-                {/* <Table dataFromParent = {this.state.time}/> */}
-                {/* <Table/> */}
-
-                <table>
-                    <tr>
-                        <th>Nazwa czynności</th>
-                        <th>Czas trwania</th>
-                        <th>Poprzednie czynności</th>
-                    </tr>
-                {this.elements.map((element) => (
-                    <tr key={element.name}>
-                        {Object.values(element).map((val) => (
-                            <td>{val}</td>
-                        ))}
-                    </tr>
-                ))}
-                </table>
-
-                <Results parentData = {this.state}/>
-            </div>
-        );
-    }
-
-    setName(event) {
-        const value = event.target.value;
-
-        this.setState({name: value});
-    }
-
-    setTime(event) {
-        const value = event.target.value;
-
-        this.setState({time: value});
-    }
-
-    setSequenceOfEvents(event) {
-        const value = event.target.value;
-
-        this.setState({sequenceOfEvents: value});   
-}
-
-    handleSubmit(event) {
-        this.elements.push(this.state);
-        this.state = {
-            name: '',
-            time: '',
+    // const [name, setName] = useState("");
+    // const [time, setTime] = useState(0);
+    // const [sequenceOfEvents, setSequenceOfEvents] = useState([]);
+    const [formData, setFormData] = useState(
+        {
+            name: "",
+            time: "",
             sequenceOfEvents: []
-        };
+        }
+    );
 
-        event.preventDefault();
+    const [rowData, setRowData] = useState(
+        {
+            name: "",
+            time: "",
+            sequenceOfEvents: []
+        }
+    );
 
 
 
-        alert('Pomyslnie dodano');
-    }
+
+    return (
+        <div className="form">
+            <form onSubmit={(event)=>{
+                event.preventDefault();
+               
+                setRowData({...rowData, name: formData.name, time: formData.time, sequenceOfEvents: formData.sequenceOfEvents});
+
+                setFormData({...formData, name: "", time: "", sequenceOfEvents: []});
 
 
-    sendData() {
-        return 
-    }
+            }}>
+                <label htmlFor="name">Nazwa czynności: </label>
+                <input name="name" id="name" value={formData.name} onChange={(event) => setFormData({...formData, name: event.target.value})}/>
+
+                &nbsp;&nbsp;
+
+                <label htmlFor="time">Czas trwania czynności:</label>
+                <input name="time" id="time" value={formData.time} onChange={(event) => setFormData({...formData, time: event.target.value})}/>
+                
+                &nbsp;&nbsp;
+
+                <label htmlFor="sequenceOfEvents">Czynności poprzedzające:</label>
+                <input name="sequenceOfEvents" id="sequenceOfEvents" value={formData.sequenceOfEvents} 
+                    onChange={(event) => setFormData({...formData, sequenceOfEvents: event.target.value})}/>
+
+                <input type="submit" value="Dodaj"/>
+            </form>
+
+            <br/>
+            <br/>
+
+            <Table 
+                name={rowData.name}
+                time={rowData.time}
+                sequenceOfEvents={rowData.sequenceOfEvents}
+            />
+      
+
+           </div>
+    );
 }

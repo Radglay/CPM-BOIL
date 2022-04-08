@@ -1,6 +1,6 @@
 import React, { Component } from "react"
 import Chart from "react-google-charts";
-
+import '../App.css';
 
 
 export default class Results extends React.Component {
