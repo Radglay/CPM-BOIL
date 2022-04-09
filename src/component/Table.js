@@ -1,38 +1,21 @@
 import React, { useState } from "react";
 import '../App.css';
-
+import Results from "./Results";
 
 export default function Table(props) {
     
     const [rows, setRows] = useState([]);
     
+    const [showResults, setShowResults] = useState(false);
+
     const rowData = props;
     
-
-
-    const elements = [{
-        id: 1,
-        name: "test1",
-        time: 12,
-        seq: ["A", "B"]
-    }, {
-        id: 2,
-        name: "test2",
-        time: 8,
-        seq: ["A"]
-    }, {        
-        id: 3,
-        name: "test3",
-        time: 9,
-        seq: ["B"]
-    }];
 
 
     if(rowDataIsNotEmpty() ) {
         if(rows.length > 0 && areEqual()) {
           // alert("nothing new");
         } else {
-            
             rows.push(rowData);
            // alert("Added new element");
         }
@@ -60,6 +43,12 @@ export default function Table(props) {
     //     }
     // }
 
+
+     
+    function calculateCPM() {
+
+    }
+
     return (
         <div>
             <table>     
@@ -82,6 +71,10 @@ export default function Table(props) {
                     </tr>
                 ))}
         </table>
+
+        <button onClick={() => setShowResults(true)}>Wyznacz CPM</button>
+
+           {showResults && <Results data={rows}/>}
         </div>
     );
 }
