@@ -8,27 +8,69 @@ export default function Table(props) {
     
     const [showResults, setShowResults] = useState(false);
 
-    const rowData = props;
+    var rowData = props;
     
 
 
-    if(rowDataIsNotEmpty() ) {
-        if(rows.length > 0 && areEqual()) {
+    if(rowDataIsNotEmpty()) {
+        if(rows.length > 0 && areEqual()) { //prevent infinity adding
           // alert("nothing new");
-        } else {
-            rows.push(rowData);
+        
+        } 
+        else if(invalidSequenceOfEvents(rowData)) {
+            rowData = {
+                name: "", 
+                time: "",
+                sequenceOfEvents: ""
+              }
+        }
+        else {
+            if(!isPresent(rowData)) {
+                rows.push(rowData);
+            }
            // alert("Added new element");
         }
 
     }
 
-    function rowDataIsNotEmpty() {
-        return !(rowData.name === "" || rowData.time === "" || rowData.sequenceOfEvents.length === 0); 
+
+    function invalidSequenceOfEvents(rowData) {
+
+        //more than one connection between nodes
+        var soe = rowData.sequenceOfEvents;
+
+        for (const row of rows) {
+            if(row.sequenceOfEvents === soe.split("").reverse().join("")) {
+                return true;
+            }
+        }
     }
 
-    function areEqual() {
-        return  rowData.name === rows[rows.length - 1].name &&
+  
+    function rowDataIsNotEmpty() {
+        return !(rowData.name === "" || rowData.time === "" || rowData.sequenceOfEvents === ""); 
+    }
+
+    function areEqual() { //conditional statemen important while writing to inputs
+        return rowData.name === rows[rows.length - 1].name &&
                 rowData.sequenceOfEvents === rows[rows.length - 1].sequenceOfEvents;
+    }
+
+    function isPresent(rowData) {
+
+        for (const row of rows) {
+            if(row.name === rowData.name) {
+                //alert("name");
+                return true;
+            }
+
+            if(row.sequenceOfEvents === rowData.sequenceOfEvents) {
+                //alert("sequence");
+                return true;
+            }
+        }
+
+        return false;
     }
 
     // function rowDataIsCorrect() {
@@ -60,7 +102,7 @@ export default function Table(props) {
                            Czas trwania
                         </th>
                         <th>
-                           Poprzednicy
+                           Następstwo zdarzeń
                         </th>
                     </tr>
                     {rows.map((item) => (

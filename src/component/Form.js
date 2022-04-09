@@ -12,7 +12,7 @@ export default function Form() {
         {
             name: "",
             time: "",
-            sequenceOfEvents: []
+            sequenceOfEvents: ""
         }
     );
 
@@ -20,7 +20,7 @@ export default function Form() {
         {
             name: "",
             time: "",
-            sequenceOfEvents: []
+            sequenceOfEvents: ""
         }
     );
    
@@ -31,16 +31,40 @@ export default function Form() {
         <div className="form">
             <form onSubmit={(event)=>{
                 event.preventDefault();
-               
+
+
+
+
+                //validation
+                if(!/^[A-Z]+$/.test(formData.name)) {
+                    alert("Błąd! Nazwa czynności może być jedynie kombinacją DUŻYCH liter!");
+                    setFormData({...formData, name: "", time: "", sequenceOfEvents: ""});
+
+                    return;
+                }
+
+                if(!/^\d+-\d+/.test(formData.sequenceOfEvents)) {
+                    alert("Błąd! Poprawny format następstwa zdarzeń to NUMER1-NUMER2")
+                    setFormData({...formData, name: "", time: "", sequenceOfEvents: ""});
+
+                    return;
+                }
+
+                if(!/^\d+$/.test(formData.time)) {
+                    alert("Błąd! Czas trwania może być jedynie liczbą całkowitą!");
+                    setFormData({...formData, name: "", time: "", sequenceOfEvents: ""});
+
+                    return;
+                }
+                
                 setRowData({...rowData, name: formData.name, time: formData.time, sequenceOfEvents: formData.sequenceOfEvents});
 
-                setFormData({...formData, name: "", time: "", sequenceOfEvents: []});
-
+                setFormData({...formData, name: "", time: "", sequenceOfEvents: ""});
 
             }}>
                 <label htmlFor="name">Nazwa czynności: </label>
                 <input name="name" id="name" value={formData.name} onChange={(event) => setFormData({...formData, name: event.target.value})}/>
-
+                
                 &nbsp;&nbsp;
 
                 <label htmlFor="time">Czas trwania czynności:</label>
@@ -48,10 +72,10 @@ export default function Form() {
                 
                 &nbsp;&nbsp;
 
-                <label htmlFor="sequenceOfEvents">Czynności poprzedzające:</label>
+                <label htmlFor="sequenceOfEvents">Następstwo zdarzeń</label>
                 <input name="sequenceOfEvents" id="sequenceOfEvents" value={formData.sequenceOfEvents} 
                     onChange={(event) => setFormData({...formData, sequenceOfEvents: event.target.value})}/>
-
+                
                 <input type="submit" value="Dodaj"/>
             </form>
 

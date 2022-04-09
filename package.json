@@ -11,6 +11,7 @@
     "react-force-graph": "^1.41.12",
     "react-google-charts": "^4.0.0",
     "react-scripts": "5.0.0",
+    "react-sigma": "^1.2.35",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
