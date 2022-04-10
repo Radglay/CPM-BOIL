@@ -8,6 +8,7 @@ import { ForceGraph2D, ForceGraph3D, ForceGraphVR, ForceGraphAR } from 'react-fo
 
 import { Sigma, EdgeShapes, NodeShapes } from 'react-sigma';
 
+
 export default function Results(props) {
 
     const rowsData = props;
@@ -18,6 +19,7 @@ export default function Results(props) {
 
 
     const nodes = new Map();
+    
 
     function daysToMilliseconds(days) {
         return days * 24 * 60 * 60 * 1000;
@@ -75,7 +77,7 @@ export default function Results(props) {
 
 
     for (const entry of predecessors) { //[key, value] array
-        nodes.set(entry[0], {pre: entry[1], suc: []});
+        nodes.set(entry[0], {pre: entry[1], suc: null});
     }
 
     for (const entry of successors) {
@@ -85,16 +87,11 @@ export default function Results(props) {
 
             nodes.set(entry[0], values);
         } else {
-            nodes.set(entry[0], {pre: [], suc: entry[1]});
+            nodes.set(entry[0], {pre: null, suc: entry[1]});
         }
     }
  
 
-    alert(JSON.stringify(nodes.get("2")));
-
-    // alert("suc: " + successors.get("2"));
-    // alert("pre: " + predecessors.get("2"));
-   
 
 
 
@@ -108,64 +105,194 @@ export default function Results(props) {
         { type: "string", label: "Dependencies" }
     ];
 
-    // const rows = rowsData.data.map((row) => {
-    //     const dependencies = 
-    //     return [
-    //         row.name,
-    //         row.name,
-    //         currentDate,
-    //         daysToMilliseconds(row.time),
-    //         row.time,
+
+    //correct example
+    // const rows = [
+    //     [
+    //         "1",
+    //         "1",
+    //         null,
+    //         null,
+    //         daysToMilliseconds(1),
     //         100,
-    //         (/^1/.test(row.sequenceOfEvents))? null : 
+    //         null
     //     ]
-    // });
-
-    //alert(JSON.stringify(rows[0]));
+    // ]
 
 
-    // const data = {
-    //     nodes: [
-    //         {id: "A", label: "A1", color: "red"},
-    //         {id: "B", label: "B1"}
-    //     ],
-    //     links: [
-    //         {source: "A", target: "B", value: 10, label: "10"}
-    //     ]
-    // };
+
+ 
+    const rows = rowsData.data.map((row) => {
+        const [left, right] = row.sequenceOfEvents.split("-");
+
+        return [
+            right,
+            right,
+            null,
+            null,
+            daysToMilliseconds(row.time),
+            100,
+            left
+        ]
+    });
+
+    var startNodeId = null;
+    for (const entry of nodes) {
+        if (entry[1].pre == null) { //starting node...
+            startNodeId = entry[0];
+        }
+    }
+
+    var endNodeId = null;
+    for (const entry of nodes) {
+        if (entry[1].suc == null) { //starting node...
+            endNodeId = entry[0];
+        }
+    }
+
+ 
+    
+    
+
+    rows.push([
+        startNodeId,
+        startNodeId,
+        null,
+        null,
+        10000000,
+        100,
+        null
+    ]);
 
 
-    // const data2 = {
-    //     nodes: [
-    //         {id: "A", label: "A1", x: 0, y:0, size: 10},
-    //         {id: "B", label: "B1", x: 2, y:0, size: 5}
-    //     ],
-    //     edges: [
-    //         {id: "e1", source: "A", target: "B", label: "test"}
-    //     ]
+    //validation of rows
+    const  options={
+        gantt: {
+            arrow: {
+                color: "green"
+            }
+        }
+    };
+
+
+   //alert(predecessors.get("2"));
+
+
+    const ES = new Map();
+    const FS = new Map();
+    
+    // {
+    //     maxTime,
+    //     path,
     // }
+    
+    const criticalPath = [];
+
+
+
+  //  function walkAhead() {
+        const costs = new Map();
+
+
+
+    for(const nodeEntry of nodes) {
+        calculateCost(nodeEntry[0]);
+    }
+        // for (const nodeEntry of nodes) {
+        //     if(nodeEntry[1].pre == null) { //starting node 
+        //         ES.set(nodeEntry[0], 0); //cost 0 for the first node
+        //     } else {
+        //         for(const pre of nodeEntry[1].pre) {
+        //             const activity = pre + "-" + nodeEntry[0];
+        //             const row = rowsData.data.find(element => element.sequenceOfEvents === activity);
+
+
+                    
+        //             const cost = ((ES.get(pre) == undefined)? calculateCost() : parseInt(ES.get(pre)))  + parseInt(row.time);
+        //             ES.set(nodeEntry[0], cost);
+        //         }
+        //     }
+        // }
+
+
+    function calculateCost(id) {
+        if(id === startNodeId) {
+            ES.set(id, 0);
+
+            return;
+        }
+
+        for (const nodeEntry of nodes) {
+            if(nodeEntry[0] === id) { //starting node 
+                for(const pre of nodeEntry[1].pre) {
+                    const activity = pre + "-" + nodeEntry[0];
+                    const row = rowsData.data.find(element => element.sequenceOfEvents === activity);
+
+
+                    if(!ES.has(pre)) {
+                        calculateCost(pre);
+                    }
+                    
+                    const cost = parseInt(ES.get(pre)) + parseInt(row.time);
+
+                    if(ES.has(nodeEntry[0])) {
+                        if(ES.get(nodeEntry[0]) < cost) {
+                            ES.set(nodeEntry[0], cost);
+                        }
+                    } else {
+                        ES.set(nodeEntry[0], cost);
+                    }
+                
+                }
+            }
+        }
+    }
+    
+   // }
+
+   alert(ES.get("5"));
+
+
+  /// alert(ES.get("1") + " " + ES.get("2"));
+
+
+
+
+
+    function calculateES() { //earliest time of start
+        for(const entry of predecessors) {
+            if(entry[1].predecessors == null) { //starting node
+                ES.set(entry[0], 0);
+            } else {
+                const size = entry[1].predecessors.length;
+
+
+             //   ES.set(entry[0], Math.max());
+            }
+        }
+    }
+
    
 
-    // const graphSettings = {
-    //     drawEdges: true,
-    //     drawLabels: true
-    // };
+    function calculateEF() {    //earliest time of finish
 
-    // const graphStyle = {
-    //     height: "500px"
-    // };
+    }
 
-   
+    function calculateCPM() {
+
+    }
+
 
     return (
         <>
-        {/* <Chart 
+        <Chart 
             chartType="Gantt"
             data={[columns, ...rows]}
             width="100%"
             height="50%"
-            legnedToggle
-        /> */}
+           
+            legendToggle
+        /> 
    
         {/* <ForceGraph2D 
             graphData={data}
