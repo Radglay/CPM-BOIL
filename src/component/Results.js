@@ -7,6 +7,7 @@ import { ForceGraph2D, ForceGraph3D, ForceGraphVR, ForceGraphAR } from 'react-fo
 
 
 import { Sigma, EdgeShapes, NodeShapes } from 'react-sigma';
+import { EditDialogFieldSettings } from "@syncfusion/ej2-react-gantt";
 
 
 export default function Results(props) {
@@ -51,8 +52,16 @@ export default function Results(props) {
 
            //add successors of the node...
             if(successors.has(left.toString())) { //has atleast one value with that key...
-                const values = [];
-                values.push(successors.get(left.toString()));
+                // const values = [];
+                // values.push(successors.get(left.toString()));
+                // values.push(right.toString());
+
+                // successors.set(left.toString(), values);
+
+                var values = [];
+                for (const suc of successors.get(left.toString())) {
+                    values.push(suc);
+                }
                 values.push(right.toString());
 
                 successors.set(left.toString(), values);
@@ -62,10 +71,18 @@ export default function Results(props) {
            
             //add predecessors of the node
             if(predecessors.has(right.toString())) { //has atleast one value with that key...
-                const values = [];
-                values.push(predecessors.get(right.toString()));
-                values.push(left.toString());
+                // const values = [];
+                // values.push(predecessors.get(right.toString()));
+                // values.push(left.toString());
 
+                // predecessors.set(right.toString(), values);
+
+                var values = [];
+                for (const pre of predecessors.get(right.toString())) {
+                    values.push(pre);
+                }
+
+                values.push(left.toString());
                 predecessors.set(right.toString(), values);
             } else { //empty map
                 predecessors.set(right.toString(), left.toString());
@@ -92,7 +109,7 @@ export default function Results(props) {
     }
  
 
-
+  
 
 
     const columns = [
@@ -143,12 +160,12 @@ export default function Results(props) {
         }
     }
 
-    var endNodeId = null;
-    for (const entry of nodes) {
-        if (entry[1].suc == null) { //starting node...
-            endNodeId = entry[0];
-        }
-    }
+    // var endNodeId = null;
+    // for (const entry of nodes) {
+    //     if (entry[1].suc == null) { //starting node...
+    //         endNodeId = entry[0];
+    //     }
+    // }
 
  
     
@@ -179,43 +196,24 @@ export default function Results(props) {
 
 
     const ES = new Map();
-    const FS = new Map();
+    const EF = new Map();
     
     // {
     //     maxTime,
     //     path,
     // }
     
-    const criticalPath = [];
-
-
 
   //  function walkAhead() {
         const costs = new Map();
 
 
 
-    for(const nodeEntry of nodes) {
-        calculateCost(nodeEntry[0]);
-    }
-        // for (const nodeEntry of nodes) {
-        //     if(nodeEntry[1].pre == null) { //starting node 
-        //         ES.set(nodeEntry[0], 0); //cost 0 for the first node
-        //     } else {
-        //         for(const pre of nodeEntry[1].pre) {
-        //             const activity = pre + "-" + nodeEntry[0];
-        //             const row = rowsData.data.find(element => element.sequenceOfEvents === activity);
 
+   //alert(JSON.stringify(nodes.get("4")));
+   
 
-                    
-        //             const cost = ((ES.get(pre) == undefined)? calculateCost() : parseInt(ES.get(pre)))  + parseInt(row.time);
-        //             ES.set(nodeEntry[0], cost);
-        //         }
-        //     }
-        // }
-
-
-    function calculateCost(id) {
+    function walkAhead(id) {
         if(id === startNodeId) {
             ES.set(id, 0);
 
@@ -223,14 +221,14 @@ export default function Results(props) {
         }
 
         for (const nodeEntry of nodes) {
-            if(nodeEntry[0] === id) { //starting node 
+            if(nodeEntry[0] === id) {
                 for(const pre of nodeEntry[1].pre) {
                     const activity = pre + "-" + nodeEntry[0];
                     const row = rowsData.data.find(element => element.sequenceOfEvents === activity);
 
 
                     if(!ES.has(pre)) {
-                        calculateCost(pre);
+                        walkAhead(pre);
                     }
                     
                     const cost = parseInt(ES.get(pre)) + parseInt(row.time);
@@ -247,41 +245,129 @@ export default function Results(props) {
             }
         }
     }
-    
+    //     alert(entry[0]);
+    // }
+
+    function walkAback(id) {
+        //find largest
+        var index = maxES(); //end node
+
+        // if(index == startNodeId) { //finish
+        //     EF.set(index, 0);
+        //     return;
+        // } else if () {
+        
+        if(nodes.get(id).suc == null) {
+            
+            EF.set(id, ES.get(index));
+            return;
+        }
+
+        for (const nodeEntry of nodes) {
+            if(nodeEntry[0] === id) {
+                for (const suc of nodeEntry[1].suc) {
+                    const activity = nodeEntry[0] + "-" + suc;
+                    const row = rowsData.data.find(element => element.sequenceOfEvents === activity);
+
+            
+                    if(!EF.has(suc)) {
+                        walkAback(suc);
+                    }
+
+
+                    
+                    const cost = parseInt(EF.get(suc)) - parseInt(row.time);
+         
+
+                    if(EF.has(nodeEntry[0])) {
+                        if(EF.get(nodeEntry[0]) > cost) {
+                            EF.set(nodeEntry[0], cost);
+                        }
+                    } else {
+                        EF.set(nodeEntry[0], cost);
+                    }
+                }
+            }
+        }
+ 
+   }
+    function maxES() {
+        var max = 0;
+        var index = 0;
+        for (const ESentry of ES) {
+            if(ESentry[1] > max) {
+                max = ESentry[1];
+                index = ESentry[0];
+            }
+        }
+
+        return index;
+    }
+
+
    // }
 
-   alert(ES.get("5"));
+  // calculate CPM
+    for(const nodeEntry of nodes) {
+        walkAhead(nodeEntry[0]);
+    }
+    
+    for(const nodeEntry of nodes) {
+        walkAback(nodeEntry[0]);
+    }
 
 
-  /// alert(ES.get("1") + " " + ES.get("2"));
+    // alert(nodes.get(6));
+    // alert(JSON.stringify(nodes.get("6")));
+    // alert(ES.get("6"));
 
+    const index = maxES();
+   
+    const visited = new Map();
 
+    var criticalPathString = calculateCPM(index);
+    criticalPathString += index;
 
+    // alert(JSON.stringify(nodes.get("6")));
+  
+     function calculateCPM(id) {
+        // if(visited.get(id) === true) {
+        //     return;
+        // }
 
+        if(id === startNodeId) {
+            return "";
+        }
 
-    function calculateES() { //earliest time of start
-        for(const entry of predecessors) {
-            if(entry[1].predecessors == null) { //starting node
-                ES.set(entry[0], 0);
-            } else {
-                const size = entry[1].predecessors.length;
+        for(const pre of nodes.get(id).pre) { //all predecessors of the node
+            //const dt = EF.get(pre) - ES.get(pre); //EF - ES
+            const activity = pre + "-" + id;
+            const row = rowsData.data.find(element => element.sequenceOfEvents === activity);
 
-
-             //   ES.set(entry[0], Math.max());
+            //alert(JSON.stringify(row));
+            const dt = EF.get(id) - row.time;
+            
+            if(dt === ES.get(pre)) {
+                // criticalPath.push(pre);
+                
+              //  alert(pre);
+                
+                return calculateCPM(pre) + pre + ",";               
             }
+
         }
     }
 
-   
+    alert(ES.get("6"));
 
-    function calculateEF() {    //earliest time of finish
+    const criticalPath = criticalPathString.split(",");
 
-    }
+    // alert(criticalPath);
+    // const tr = criticalPath.reduce((partialSum, a) => partialSum + ES.get(a) , 0);
+    const tr = ES.get(index);
+    alert(tr);
 
-    function calculateCPM() {
-
-    }
-
+    
 
     return (
         <>
@@ -308,6 +394,13 @@ export default function Results(props) {
             
         </Sigma> */}
 
+
+        <h1>
+            CPM:{criticalPathString}
+        </h1>
+        <h1>
+            Tr: {tr}
+        </h1>
         </>
 
 
