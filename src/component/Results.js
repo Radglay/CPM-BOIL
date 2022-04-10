@@ -1,4 +1,4 @@
-import React, { Component } from "react"
+import React, { Component, useState } from "react"
 import Chart from "react-google-charts";
 import '../App.css';
 import Node from "../Node";
@@ -11,6 +11,8 @@ import { EditDialogFieldSettings } from "@syncfusion/ej2-react-gantt";
 
 
 export default function Results(props) {
+
+    const [correct, setCorrect] = useState(true);
 
     const rowsData = props;
     const currentDate = new Date();
@@ -109,54 +111,25 @@ export default function Results(props) {
     }
  
 
+
   
 
 
-    const columns = [
-        {type: "string", label: "Task ID"},
-        { type: "string", label: "Task Name" },
-        { type: "date", label: "Start Date" },
-        { type: "date", label: "End Date" },
-        { type: "number", label: "Duration" },
-        { type: "number", label: "Percent Complete" },
-        { type: "string", label: "Dependencies" }
-    ];
-
-
-    //correct example
-    // const rows = [
-    //     [
-    //         "1",
-    //         "1",
-    //         null,
-    //         null,
-    //         daysToMilliseconds(1),
-    //         100,
-    //         null
-    //     ]
-    // ]
-
-
-
  
-    const rows = rowsData.data.map((row) => {
-        const [left, right] = row.sequenceOfEvents.split("-");
-
-        return [
-            right,
-            right,
-            null,
-            null,
-            daysToMilliseconds(row.time),
-            100,
-            left
-        ]
-    });
-
     var startNodeId = null;
     for (const entry of nodes) {
         if (entry[1].pre == null) { //starting node...
             startNodeId = entry[0];
+        }
+    }
+
+
+
+    //start node validation
+    for(const entry of nodes) {
+        if(entry[0] !== startNodeId && entry[1].pre == null) {
+            alert("BŁĄD!Więcej niż jeden węzeł startowy!");
+            window.location.reload(false);
         }
     }
 
@@ -168,22 +141,12 @@ export default function Results(props) {
     // }
 
  
-    
-    
 
-    rows.push([
-        startNodeId,
-        startNodeId,
-        null,
-        null,
-        10000000,
-        100,
-        null
-    ]);
+
 
 
     //validation of rows
-    const  options={
+    const options={
         gantt: {
             arrow: {
                 color: "green"
@@ -212,6 +175,8 @@ export default function Results(props) {
 
    //alert(JSON.stringify(nodes.get("4")));
    
+
+
 
     function walkAhead(id) {
         if(id === startNodeId) {
@@ -305,6 +270,15 @@ export default function Results(props) {
     }
 
 
+
+
+    //////////////
+    //end nodes and start nodes validation
+
+  
+    
+
+
    // }
 
   // calculate CPM
@@ -317,12 +291,23 @@ export default function Results(props) {
     }
 
 
+
+
     // alert(nodes.get(6));
     // alert(JSON.stringify(nodes.get("6")));
     // alert(ES.get("6"));
 
     const index = maxES();
    
+    for(const entry of nodes) {
+
+        if(entry[0] !== index && ES.get(index) === ES.get(entry[0])) {
+            alert("Może być tylko jeden węzeł końcowy!");
+            window.location.reload(false);
+        }
+    }
+
+
     const visited = new Map();
 
     var criticalPathString = calculateCPM(index);
@@ -358,16 +343,108 @@ export default function Results(props) {
         }
     }
 
-    alert(ES.get("6"));
 
     const criticalPath = criticalPathString.split(",");
 
     // alert(criticalPath);
     // const tr = criticalPath.reduce((partialSum, a) => partialSum + ES.get(a) , 0);
     const tr = ES.get(index);
-    alert(tr);
+  
 
+
+
+
+    const columns = [
+        {type: "string", label: "Task ID"},
+        { type: "string", label: "Task Name" },
+        { type: "date", label: "Start Date" },
+        { type: "date", label: "End Date" },
+        { type: "number", label: "Duration" },
+        { type: "number", label: "Percent Complete" },
+        { type: "string", label: "Dependencies" }
+    ];
+
+
+    //correct example
+    // const rows = [
+    //     [
+    //         "1",
+    //         "1",
+    //         null,
+    //         null,
+    //         daysToMilliseconds(1),
+    //         100,
+    //         null
+    //     ]
+    // ]
+
+ 
+
+
+    function maxOfPredecessors(nodeEntry) {
+        var maxIndex = 0;
+        var max = 0;
+
+        for(const pre of nodeEntry[1].pre) {
+            if(ES.get(pre) >= max) {
+                max = ES.get(pre);
+                maxIndex = pre;
+            }
+        }
+
+        const activity = maxIndex + "-" + nodeEntry[0];
+        const row = rowsData.data.find(element => element.sequenceOfEvents === activity);
+
+        return row.time;
+    }
+
+
+
+    const rows = [];
+    for (const nodeEntry of nodes) {
+
+        if(nodeEntry[0] !== startNodeId) { //is not the start node
+            // for(const pre of nodeEntry[1].pre) {
+                console.log(nodeEntry[1].pre)
+                rows.push(
+                    [
+                        nodeEntry[0],
+                        nodeEntry[0],
+                        null,
+                        null,
+                        daysToMilliseconds(maxOfPredecessors(nodeEntry)),
+                        100,
+                        (nodeEntry[1].pre).toString()
+                    ]
+                );
+            }
+    }
+
+    rows.push([
+        startNodeId,
+        startNodeId,
+        null,
+        null,
+        10000000,
+        100,
+        null
+    ]);
+ 
+    // const rows = rowsData.data.map((row) => {
+    //     const [left, right] = row.sequenceOfEvents.split("-");
+
+    //     return [
+    //         right,
+    //         right,
+    //         null,
+    //         null,
+    //         daysToMilliseconds(row.time),
+    //         100,
+    //         left
+    //     ]
+    // });
     
+
 
     return (
         <>
@@ -375,8 +452,7 @@ export default function Results(props) {
             chartType="Gantt"
             data={[columns, ...rows]}
             width="100%"
-            height="50%"
-           
+            height="800px"
             legendToggle
         /> 
    
@@ -396,10 +472,10 @@ export default function Results(props) {
 
 
         <h1>
-            CPM:{criticalPathString}
+            Ścieżka krytyczna:<strong>{criticalPathString}</strong>
         </h1>
         <h1>
-            Tr: {tr}
+            Czas trwania: <strong>{tr}</strong> dni
         </h1>
         </>
 

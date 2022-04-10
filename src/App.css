@@ -10,7 +10,11 @@ body {
   width: 80vw;
   height: 100vh;
   margin: auto;
-}
+  background-image: url("images/background.jpg");
+  background-size: cover;
+} 
+
+
 
 td, th {
   border: 2px solid black;
@@ -35,4 +39,55 @@ th {
 table > tr {
   height: 50px;
   text-align: center;
+  background-color: #634a72;
+}
+
+body {
+  background-color: #b08cc5;
+  background: linear-gradient(0.25turn, #9167aa, #052369);
+}
+
+h1 {
+  color: #1c0629;
+}
+
+label {
+  color: white;
+  font-weight: 600;
+}
+
+form {
+  margin: 0 10%;
+}
+
+form > input {
+  background-color: #1c0629;
+  border-radius: 20px;
+  color: white;
+  padding: 5px;
+}
+
+#submit-btn {
+  display: block;
+  margin: auto;
+  padding: 10px 20px;
+  font-size: 20px;
+}
+
+#submit-bnt:hover {
+  color: red;
+}
+
+#cpm-btn {
+  display: block;
+  margin: auto;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  padding: 10px 20px;
+  font-size: 20px;
+  background-color: #c892e8;
+}
+
+#cpm-btn:hover {
+  background-color: #5869b6;
 }

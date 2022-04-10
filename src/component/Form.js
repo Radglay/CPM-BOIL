@@ -76,7 +76,7 @@ export default function Form() {
                 <input name="sequenceOfEvents" id="sequenceOfEvents" value={formData.sequenceOfEvents} 
                     onChange={(event) => setFormData({...formData, sequenceOfEvents: event.target.value})}/>
                 
-                <input type="submit" value="Dodaj"/>
+                <input type="submit" id="submit-btn" value="Dodaj"/>
             </form>
 
             <br/>

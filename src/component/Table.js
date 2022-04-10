@@ -11,6 +11,7 @@ export default function Table(props) {
     var rowData = props;
     
 
+    
 
     if(rowDataIsNotEmpty()) {
         if(rows.length > 0 && areEqual()) { //prevent infinity adding
@@ -86,10 +87,9 @@ export default function Table(props) {
     // }
 
 
-     
-    function calculateCPM() {
-
-    }
+    // if(rows.length === 0) {
+    //     setShowResults(false);
+    // }
 
     return (
         <div>
@@ -114,7 +114,12 @@ export default function Table(props) {
                 ))}
         </table>
 
-        <button onClick={() => setShowResults(true)}>Wyznacz CPM</button>
+        <button id="cpm-btn" onClick={() => {
+            if(rows.length === 0) {
+                return setShowResults(false);
+            }
+            return setShowResults(true);
+            }}>Wyznacz CPM</button>
 
            {showResults && <Results data={rows}/>}
         </div>
